@@ -3,7 +3,7 @@
   <Balance :total="total" />
   <IncomeExpenses :expenses="+ expenses" :income="+ income"/>
   <TransactionList :transactions="transactions" :deleteTransaction="deleteTransaction" @transaction-deleted="handleTransactionDeleted"/>
-  <AddTransaction :sendJson="sendJson" @transaction-submitted="handleTransactionSubmitted"/>
+  <AddTransaction :onSubmit="onSubmit" :sendJson="sendJson"/>
   <div class="container">
 
   </div>
@@ -26,7 +26,12 @@ const toast = useToast()
 // Função para deletar uma transação
 const deleteTransaction = async (id) => {
   try {
-    await axios.delete(`http://127.0.0.1:8000/transactions/${id}`);
+    await axios.delete(`http://127.0.0.1:8000/transactions/${id}`)
+    .then((response) => {
+      if(response.status == 200){
+        toast.warning("Deletado!")
+      }
+    })
     transactions.value = transactions.value.filter(transaction => transaction.id !== id);
     console.log(`Transação com ID ${id} deletada com sucesso.`);
   } catch (error) {
@@ -52,12 +57,31 @@ const dataApi = async () => {
 const sendJson = () => {
   try {
     const datas = {"amount_transaction": amount.value, "name_transaction": text.value,};
-    axios.post("http://127.0.0.1:8000/transaction", datas);
-    toast.success("Created Successfully")
+    axios.post("http://127.0.0.1:8000/transaction", datas)
+    .then((response) =>{
+      if (response.status == 200){
+        toast.success("Created Successfully")
+      }
+    })
+   
   } catch (error) {
     console.log(error);
   }
 }
+
+const onSubmit = () => {
+  if (!text.value || !amount.value) {
+    toast.error('Both fields must be filled');
+    console.log("evento enviado")
+    return;
+  }
+  // Chamando a função sendJson passada como prop
+  sendJson();
+  // Limpar campos após envio
+  text.value = '';
+  amount.value = '';
+  dataApi()
+};
 
 // get total
 const total = computed(() => {
@@ -85,15 +109,9 @@ const expenses = computed(() =>{
   }, 0).toFixed(2)
 })
 
-// add transaction
-const handleTransactionSubmitted = () => {
-  toast.success('Successfully created')
-}
-
 const handleTransactionDeleted = (id) =>{
 transactions.value = transactions.value.filter((transaction) => 
 transaction.id !== id)
-
 toast.success("Transaction deleted")
 }
 
