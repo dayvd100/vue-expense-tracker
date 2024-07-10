@@ -27,8 +27,10 @@ const toast = useToast()
 const dataApi = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/transactions");
-      transactions.value = response.data; 
-      console.log(response);
+      if(response.status == 200){
+        transactions.value = response.data; 
+        console.log(response);
+      }
     } catch (error) {
       console.log(error);
     }
