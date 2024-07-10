@@ -18,6 +18,7 @@
 
 <script setup>
 
+import axios from 'axios';
 import { ref } from 'vue';
 import { useToast } from 'vue-toastification';
 
@@ -28,16 +29,25 @@ const emit = defineEmits(['transactionSubmitted'])
 
 const toast = useToast()
 
+const sendJson = () => {
+    try {
+      const datas = {"amount_transaction": amount.value, "name_transaction": text.value,};
+      axios.post("http://127.0.0.1:8000/transaction", datas);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
 const onSubmit = () => {
   if(!text.value || !amount.value){
     toast.error('Both fields must be filled')
     return;
   }
+  sendJson();
 
   const transactionData = { 
     text: text.value,
     amount: parseFloat(amount.value)
-
   }
 
   emit('transactionSubmitted', transactionData)
