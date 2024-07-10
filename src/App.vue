@@ -2,8 +2,8 @@
   <Header/>
   <Balance :total="total" />
   <IncomeExpenses :expenses="+ expenses" :income="+ income"/>
-  <TransactionList @transaction-deleted="handleTransactionDeleted"/>
-  <AddTransaction @transaction-submitted="handleTransactionSubmitted"/>
+  <TransactionList :transactions="transactions" :deleteTransaction="deleteTransaction" @transaction-deleted="handleTransactionDeleted"/>
+  <AddTransaction :sendJson="sendJson" @transaction-submitted="handleTransactionSubmitted"/>
   <div class="container">
 
   </div>
@@ -23,7 +23,17 @@ import axios from "axios";
 const transactions = ref([]);
 const toast = useToast()
 
-  
+// Função para deletar uma transação
+const deleteTransaction = async (id) => {
+  try {
+    await axios.delete(`http://127.0.0.1:8000/transactions/${id}`);
+    transactions.value = transactions.value.filter(transaction => transaction.id !== id);
+    console.log(`Transação com ID ${id} deletada com sucesso.`);
+  } catch (error) {
+    console.error(`Erro ao deletar transação com ID ${id}:`, error);
+  }
+};
+
 const dataApi = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/transactions");
@@ -38,6 +48,16 @@ const dataApi = async () => {
   
   dataApi();
   
+
+const sendJson = () => {
+  try {
+    const datas = {"amount_transaction": amount.value, "name_transaction": text.value,};
+    axios.post("http://127.0.0.1:8000/transaction", datas);
+    toast.success("Created Successfully")
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 // get total
 const total = computed(() => {

@@ -9,34 +9,14 @@
 </template>
 
 <script setup>
-import axios from 'axios';
-import { ref } from 'vue';
-
-const transactions = ref([]);
-
-// Função para carregar dados iniciais
-const loadData = async () => {
-  try {
-    const response = await axios.get("http://127.0.0.1:8000/transactions");
-    if (response.status === 200) {
-      transactions.value = response.data;
-    }
-  } catch (error) {
-    console.error('Erro ao carregar transações:', error);
+const props = defineProps({
+  deleteTransaction:{
+    type: Function,
+    required: true
+  },
+  transactions:{
+    type: Array,
+    required: true
   }
-};
-
-// Chama a função para carregar os dados iniciais
-loadData();
-
-// Função para deletar uma transação
-const deleteTransaction = async (id) => {
-  try {
-    await axios.delete(`http://127.0.0.1:8000/transactions/${id}`);
-    transactions.value = transactions.value.filter(transaction => transaction.id !== id);
-    console.log(`Transação com ID ${id} deletada com sucesso.`);
-  } catch (error) {
-    console.error(`Erro ao deletar transação com ID ${id}:`, error);
-  }
-};
+})
 </script>
